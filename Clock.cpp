@@ -15,6 +15,7 @@ Clock::Clock(Memory *memin, CPU *cpuin){
 void  Clock::reset(){
        counter = 0;
 }
+//test for github
 void Clock::tick(int num){
        //cout << "clock ticking: " << num << endl;
        for(int i = 0; i < num; i++){

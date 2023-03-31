@@ -1,0 +1,84 @@
+Keep in mind, this is C, not C++
+```C
+void cpuDoCycleWork() {
+    //printf("cpuDoCycleWork state: %d\n", cpu.state);
+
+    switch (cpu.state){
+    case IDLE:
+        // Do Nothing, wait for cpuStartTick();
+        break;
+    
+    case FETCH:
+        //get the next instruction from iMemory
+        imemStartFetch(cpuGetPC(), 1, &instruction.fullInst, &cpu.fetchDone);
+        cpu.state = DECODE;
+        break;
+        
+    case DECODE:
+        //Decode all parts of iMemory for future use
+        cpu.fetchDone = false; //Prep for next fetch
+
+        instruction.opCode = instGetOpcode(instruction.fullInst);
+        instruction.destReg = instGetDestinationReg(instruction.fullInst);
+        instruction.targetReg = instGetTargetReg(instruction.fullInst);
+        instruction.sourceReg = instGetSourceReg(instruction.fullInst);
+        instruction.immediate = instGetImmediate(instruction.fullInst);
+
+        //printf("Decoded Values: Full:0x%05X, OpCode: 0x%01X, Mem2Reg: 0x%01X, Reg2Mem: 0x%01X, TrgMemAddrReg: 0x%01X, Immed: 0x%02X\n", instruction.fullInst, instruction.opCode, instruction.destReg, instruction.sourceReg, instruction.targetReg, instruction.immediate);
+
+        cpu.state = EXECUTE;
+        break;
+        
+    case EXECUTE:
+        //Does an action depending on the decoded iMemory instruction
+        switch (instruction.opCode){
+
+        case LW:
+            //Move a value from memory to a register
+            memStartFetch(cpuGetReg(instruction.targetReg), 1, &cpu.fetchVal, &cpu.fetchDone);
+            break;
+        
+        case SW:
+            //Move a value from a register to memory
+            memStartStore(cpuGetReg(instruction.targetReg), 1, &cpu.regs[instruction.sourceReg], &cpu.fetchDone);
+            break;
+        
+        default:
+            break;
+        }
+        cpu.state = WAIT;
+        break;
+        
+    case WAIT:
+        //printf("cpuDoCycleWork WAIT fetchDone: %d\n", cpu.fetchDone);
+
+        //Fetch is done, and can procede
+        if(cpu.fetchDone){
+            switch (instruction.opCode){
+
+            case LW:
+                //Sets the register with the returned value
+                cpuSetReg(instruction.destReg, cpu.fetchVal);
+                break;
+            
+            case SW:
+                //Does nothing to CPU registers
+                //Handled in memory
+                break;
+            
+            default:
+                break;
+            }
+
+            cpuSetPC(cpuGetPC()+1); //Incriments the Program Counter
+            cpu.fetchDone = false; //Reset to false for next memFetch
+            cpu.state = IDLE;
+        }
+        break;
+
+    default:
+        printf("INVALID CPU STATE\n");
+        break;
+    }
+}
+```

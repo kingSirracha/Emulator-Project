@@ -201,16 +201,24 @@ void CPU::doCycleWork(){
                         //load word (lw)
                         //loads value from mem location t_reg into d_reg
                         //cout << "loading word \n";
-                        (mem) -> memStartFetch(regs[target_reg],1);
+                        if ((cache) -> is_enabled()){
+                              (cache) -> start_retrieve(regs[target_reg]);
+                        } else {
+                              (mem) -> memStartFetch(regs[target_reg],1);
+                        }
                         break;
                   case 0b110:
                         //store word (sw)
                         //stores the value from s_reg into the mem location at t_reg
                         //cout << "storing word \n";
                         //A very hacky way of only having one val stored
-                        uint8_t in_data[1];
-                        in_data[0] = regs[source_reg];
-                        (mem) -> memStartStore(regs[target_reg],in_data,1);
+                        if ((cache) -> is_enabled()){
+                              (cache) -> start_store(regs[source_reg],regs[target_reg]);
+                        }else{
+                              uint8_t in_data[1];
+                              in_data[0] = regs[source_reg];
+                              (mem) -> memStartStore(regs[target_reg],in_data,1);
+                        }
                         break;
                   case 0b111:
                         //halt
@@ -237,17 +245,27 @@ void CPU::doCycleWork(){
                   if (internalCycleCount >= requiredCycles){
                         currentState = IDLE;
                   }
-            }else if ((mem) -> isFetchComplete()){
-                  //returns value
-                  //cout << "FETCH TASK COMPLETE" << endl;
-                  uint8_t* fetch_results = (mem) -> endFetch();
-                  regs[designated_reg] = fetch_results[0];
-                  currentState = IDLE;
-            } else if ((mem) -> isStoreComplete()){
-                  //returns value
-                  //cout << "STORE TASK COMPLETE" <<endl;
-                  (mem) -> endStore();
-                  currentState = IDLE;
+            }else if ((cache) ->is_enabled()){
+                  if ((cache)->is_retreive_complete()){
+                        regs[designated_reg] = (cache) -> get_retrieve();
+                        currentState = IDLE;
+                  } else if ((cache) -> is_store_complete()){
+                        currentState = IDLE;
+                        (cache) -> end_store();
+                  }
+            } else {
+                  if ((mem) -> isFetchComplete()){
+                        //returns value
+                        //cout << "FETCH TASK COMPLETE" << endl;
+                        uint8_t* fetch_results = (mem) -> endFetch();
+                        regs[designated_reg] = fetch_results[0];
+                        currentState = IDLE;
+                  } else if ((mem) -> isStoreComplete()){
+                        //returns value
+                        //cout << "STORE TASK COMPLETE" <<endl;
+                        (mem) -> endStore();
+                        currentState = IDLE;
+                  }
             }
             break;
       case HALT:

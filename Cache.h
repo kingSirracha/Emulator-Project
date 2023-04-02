@@ -41,13 +41,13 @@ class Cache{
       public:
             Cache(Memory *mem_ref);
             //cache is disabled and CLO = 0
+            void end_store();
             bool is_enabled();
             bool is_retreive_complete();
             bool is_store_complete();
             void start_retrieve(uint8_t addr);
             uint8_t get_retrieve();
             void start_store(uint8_t value, uint8_t addr);
-            void end_store();
             void reset();
             //cycle related commands
             bool isMoreCycleWorkNeeded();

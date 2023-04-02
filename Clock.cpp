@@ -4,12 +4,14 @@
 #include "Clock.h"
 #include "Memory.h"
 #include "Clock.h"
+#include "Cache.h"
 using namespace std;
 
 
-Clock::Clock(Memory *memin, CPU *cpuin){
+Clock::Clock(Memory *memin, CPU *cpuin, Cache *cachein){
        mem = memin;
        cpu = cpuin;
+       cache = cachein;
 };
 
 void  Clock::reset(){
@@ -30,8 +32,9 @@ void Clock::tick(int num){
               //runs while devices have tasks to perform within the tick
               while (workToDo) {
                      (mem) -> doCycleWork();
+                     (cache) -> do_cycle_work();
                      (cpu) -> doCycleWork();
-                     workToDo = ((cpu) -> isMoreCycleWorkNeeded() || (mem) -> isMoreCycleWorkNeeded());
+                     workToDo = ((cpu) -> isMoreCycleWorkNeeded() || (mem) -> isMoreCycleWorkNeeded() || (cache) -> isMoreCycleWorkNeeded());
               }
 
        }

@@ -6,6 +6,7 @@
 #include <iomanip>
 #include "Memory.h"
 #include "CPU.h"
+#include "Cache.h"
 using namespace std;
 
 
@@ -14,8 +15,9 @@ class Clock{
             int counter;
             Memory *mem;
             CPU *cpu;
+            Cache *cache;
       public:
-            Clock(Memory *memin, CPU *cpuin);
+            Clock(Memory *memin, CPU *cpuin, Cache *cachein);
             int get_counter();
             //lets devices know when a new cycle has begun
             void startTick();

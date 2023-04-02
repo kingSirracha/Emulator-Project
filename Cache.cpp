@@ -87,6 +87,11 @@ uint8_t Cache::get_retrieve(){
       task = NA;
 }
 
+void Cache::end_store(){
+      task_complete = false;
+      task = NA;
+}
+
 void Cache::start_store(uint8_t value, uint8_t addr){
       task = STORE;
       if (addr >= CLO * 8 || addr < (CLO + 1) * 8){
@@ -152,9 +157,9 @@ void Cache::do_cycle_work(){
                         case NA:
                               cout << "this line shouldn't be reached \n";
                         break;
-                        task_complete = true;
-                        state = IDLE;
                   }
+                  task_complete = true;
+                  state = IDLE;
                   //running instruction
             break;
       }

@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
       CPU cpu(&imem, &mem, &cache);
 
 
-      Clock clock(&mem, &cpu);
+      Clock clock(&mem, &cpu, &cache);
       //cout << &cpu << endl;
 
       if (argc < 2) return 1; //to make sure there's an arg

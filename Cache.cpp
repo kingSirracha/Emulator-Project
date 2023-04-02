@@ -21,6 +21,20 @@ bool Cache::is_enabled(){
       return enabled;
 }
 
+bool Cache::is_retreive_complete(){
+      if (task == RETREIVE){
+            return task_complete;
+      }
+      return false;
+}
+
+bool Cache::is_store_complete(){
+      if (task == STORE){
+            return task_complete;
+      }
+      return false;
+}
+
 void Cache::reset(){
       CLO = 0;
       //set all flags to invalid
@@ -41,6 +55,7 @@ void Cache::flush(){
                         (mem) -> store_direct(CLO * 8 + i, cache[i]);
                   }
             }
+            dataWritten = false;
       }
 }
 
@@ -49,17 +64,40 @@ void Cache::start_retrieve(uint8_t addr){
       //if in correct range
       if (addr >= CLO * 8 || addr < (CLO + 1) * 8){
             retreived_val = cache[addr - (CLO * 8)];
+            state = EXECUTE;
       } else {
             //since contents are about to be erased we flush to mem
             flush();
             CLO = floor(addr/8);
             //start a mem Fetch for the given mem area
             (mem) -> memStartFetch(addr - addr % 8, 8);
+            ref_addr = addr - (CLO * 8);
+            state = WAIT;
       }
 }
 
-void Cache::start_store(uint8_t value, uint8_t addr){
+uint8_t Cache::get_retrieve(){
+      return retreived_val;
+      task_complete = false;
+      task = NA;
+}
 
+void Cache::start_store(uint8_t value, uint8_t addr){
+      task = STORE;
+      if (addr >= CLO * 8 || addr < (CLO + 1) * 8){
+            cache[addr - (CLO * 8)] = value;
+            flags[addr - (CLO * 8)] = W;
+            dataWritten = true;
+            state = EXECUTE;
+      } else {
+            flush();
+            CLO = floor(addr/8);
+            //start a mem Fetch for the given mem area
+            (mem) -> memStartFetch(addr - addr % 8, 8);
+            ref_val = value;
+            ref_addr = addr - (CLO * 8);
+            state = WAIT;
+      }
 }
 
 void Cache::off(){
@@ -67,19 +105,56 @@ void Cache::off(){
       enabled = false;
 }
 
+void Cache::start_tick(){
+      more_cycle_work = true;
+}
+
 void Cache::do_cycle_work(){
       switch(state){
             case IDLE:
                   //must be called by an outside device to exit this state
+                  more_cycle_work = false;
             break;
             case FETCH:
                   //fetched instruction
             break;
             case WAIT:
                   //waiting usually for mem
+                  if ((mem) -> isFetchComplete()){
+                        //fetched mem vals go into cache
+                        uint8_t* temp = (mem) -> endFetch();
+                        for(int i = 0; i < 8; i++){
+                              cache[i] = temp[i];
+                        }
+                        if(task = RETREIVE){
+                              retreived_val = cache[ref_addr];
+                        } else if (task = STORE){
+                              cache[ref_addr] = ref_val;
+                              flags[ref_addr] = W;
+                              dataWritten = true;
+                        }
+                        state = EXECUTE;
+                  } else {
+                        more_cycle_work = false;
+                  }
             break;
             case EXECUTE:
+                  switch (task){
+                        case RETREIVE:
+                        break;
+                        case STORE:
+                        break;
+                        case NA:
+                              cout << "this line shouldn't be reached \n";
+                        break;
+                        task_complete = true;
+                        state = IDLE;
+                  }
                   //running instruction
             break;
       }
+}
+
+bool Cache::isMoreCycleWorkNeeded(){
+      return more_cycle_work;
 }

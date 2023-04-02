@@ -142,6 +142,17 @@ int main(int argc, char *argv[]) {
                               imem.set(arg1, testing);
                         }
 
+                  } else if (command == "cache"){
+                        if (sub_command == "on"){
+                              cache.on();
+                        } else if (sub_command == "off"){
+                              cache.off();
+                        } else if (sub_command == "reset"){
+                              cache.reset();
+                        } else if (sub_command == "dump"){
+                              cout << "the dump cmd has not yet been added for Cache\n";
+                              cout << endl;
+                        }
                   }
                   //cout << "a command was ran" << endl;
 

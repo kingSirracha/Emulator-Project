@@ -36,6 +36,11 @@ bool Cache::is_store_complete(){
 }
 
 void Cache::reset(){
+      enabled = false;
+      dataWritten = false;
+      task_complete = false;
+      state = IDLE;
+      task = NA;
       CLO = 0;
       //set all flags to invalid
       for(int i = 0; i < 8; i++){
@@ -157,4 +162,39 @@ void Cache::do_cycle_work(){
 
 bool Cache::isMoreCycleWorkNeeded(){
       return more_cycle_work;
+}
+
+void Cache::dump(){
+      if (CLO < 16){
+            //if the hex number is too small
+            cout << "CLO        : 0x0" << hex << (int) CLO << endl;
+      }else{
+            cout << "CLO        : 0x" << hex << (int) CLO << endl;
+      }
+      cout << "cache data : ";
+      for(int i = 0; i < 8; i++){
+            int temp = (int)cache[i];
+            cout <<"0x"; 
+            if(temp < 16){
+                  cout << "0"; //adds an extra 0 if the number is too low
+            }
+            cout << uppercase << hex << (int)cache[i] << " ";
+      }
+      cout << endl;
+      cout << "Flags      :";
+      for(int i = 0; i < 8; i++){
+            switch (flags[i]) {
+                  //converts the enums into strings
+                  case I:
+                        cout << "   I";
+                  break;
+                  case V:
+                        cout << "   V";
+                  break;
+                  case W:
+                        cout << "   W";
+                  break;
+            }
+      }
+      cout << endl;
 }

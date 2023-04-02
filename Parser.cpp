@@ -150,8 +150,7 @@ int main(int argc, char *argv[]) {
                         } else if (sub_command == "reset"){
                               cache.reset();
                         } else if (sub_command == "dump"){
-                              cout << "the dump cmd has not yet been added for Cache\n";
-                              cout << endl;
+                              cache.dump();
                         }
                   }
                   //cout << "a command was ran" << endl;

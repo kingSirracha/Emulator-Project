@@ -37,6 +37,7 @@ class Memory{
             void create(uint16_t mem_size);
             //sets all vals to 0
             void reset();
+            void store_direct(uint8_t addr, uint8_t val);
             //tick processes
             void start_tick();
             void doCycleWork();

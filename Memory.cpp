@@ -73,6 +73,10 @@ bool Memory::isStoreComplete(){
       return storeComplete;
 }
 
+void Memory::store_direct(uint8_t addr, uint8_t val){
+      mem[addr] = val;
+}
+
 void Memory::set(uint8_t hex_addr, uint8_t hex_count, uint8_t* values){
       //note, for the values var a temp var is needed to hold the input array when putting in the arg
       int val_count = 0;

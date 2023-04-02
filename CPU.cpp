@@ -196,13 +196,16 @@ void CPU::doCycleWork(){
                         //load word (lw)
                         //loads value from mem location t_reg into d_reg
                         //cout << "loading word \n";
-                        (mem) -> memStartFetch(regs[target_reg]);
+                        (mem) -> memStartFetch(regs[target_reg],1);
                         break;
                   case 0b110:
                         //store word (sw)
                         //stores the value from s_reg into the mem location at t_reg
                         //cout << "storing word \n";
-                        (mem) -> memStartStore(regs[target_reg],regs[source_reg]);
+                        //A very hacky way of only having one val stored
+                        uint8_t in_data[1];
+                        in_data[0] = regs[source_reg];
+                        (mem) -> memStartStore(regs[target_reg],in_data,1);
                         break;
                   case 0b111:
                         //halt
@@ -232,7 +235,8 @@ void CPU::doCycleWork(){
             }else if ((mem) -> isFetchComplete()){
                   //returns value
                   //cout << "FETCH TASK COMPLETE" << endl;
-                  regs[designated_reg] = (mem) -> endFetch();
+                  uint8_t* fetch_results = (mem) -> endFetch();
+                  regs[designated_reg] = fetch_results[0];
                   currentState = IDLE;
             } else if ((mem) -> isStoreComplete()){
                   //returns value

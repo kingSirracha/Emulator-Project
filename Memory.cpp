@@ -9,6 +9,10 @@ Memory::Memory(){
       currentState = IDLE;
       counter = 0;
       ticksToComplete = 5;
+      for(int i = 0; i < 8; i++){
+            fetchVal[i] = 0;
+            storeVal[i] = 0;
+      }
 }
 
 void Memory::create(uint16_t mem_size){
@@ -20,18 +24,21 @@ void Memory::reset(){
             mem[i] = 0x00;
       }
 }
-void Memory::memStartFetch(uint8_t hex_addr){
+void Memory::memStartFetch(uint8_t hex_addr, int count){
       taskRequested = FETCH;
       fetchComplete = false;
       storeComplete = false;
+      data_ammount = count;
       //would have been false by now so it needs another kickstart to get going again
       moreCycleWork = true;
-      fetchVal = mem[hex_addr];
+      for(int i = 0; i < count; i++){
+            fetchVal[i] = mem[hex_addr + i];
+      }
       //now waits for n ticks
       currentState = WAIT;
       //return mem[hex_addr];
 }
-uint8_t Memory::endFetch(){
+uint8_t* Memory::endFetch(){
       fetchComplete = false;
       return fetchVal;
 }
@@ -40,13 +47,16 @@ bool Memory::isFetchComplete(){
       return fetchComplete;
 }
 
-void Memory::memStartStore(uint8_t hex_addr , uint8_t value){
+void Memory::memStartStore(uint8_t hex_addr , uint8_t* value, int count){
       taskRequested = STORE;
       storeComplete = false;
       fetchComplete = false;
       moreCycleWork = true;
       storeAddr = hex_addr;
-      storeVal = value;
+      data_ammount = count;
+      for(int i = 0; i < count; i++){
+            storeVal[i] = value[i];
+      }
       //now waits for n ticks
       currentState = WAIT;
       //return mem[hex_addr];
@@ -54,7 +64,9 @@ void Memory::memStartStore(uint8_t hex_addr , uint8_t value){
 
 void Memory::endStore(){
       storeComplete = false;
-      mem[storeAddr] = storeVal;
+      for(int i = 0; i < data_ammount; i++){
+            mem[storeAddr + i] = storeVal[i];
+      }
 }
 
 bool Memory::isStoreComplete(){

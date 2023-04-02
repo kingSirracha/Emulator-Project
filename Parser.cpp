@@ -7,6 +7,7 @@
 #include "Memory.h"
 #include "Clock.h"
 #include "IMemory.h"
+#include "Cache.h"
 using namespace std;
 
 string parse_line(string &line){
@@ -33,7 +34,8 @@ uint16_t string_to_hex(string in_string){
 int main(int argc, char *argv[]) {
       Memory mem;
       IMemory imem;
-      CPU cpu(&imem, &mem);
+      Cache cache(&mem);
+      CPU cpu(&imem, &mem, &cache);
 
 
       Clock clock(&mem, &cpu);

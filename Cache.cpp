@@ -3,6 +3,7 @@
 #include <iomanip>
 #include "Cache.h"
 #include "Memory.h"
+#include <cmath>
 using namespace std;
 
 
@@ -11,6 +12,9 @@ Cache::Cache(Memory *in_mem){
       CLO = 0;
       enabled = false;
       dataWritten = false;
+      task_complete = false;
+      state = IDLE;
+      task = NA;
 }
 
 bool Cache::is_enabled(){
@@ -40,7 +44,42 @@ void Cache::flush(){
       }
 }
 
+void Cache::start_retrieve(uint8_t addr){
+      task = RETREIVE;
+      //if in correct range
+      if (addr >= CLO * 8 || addr < (CLO + 1) * 8){
+            retreived_val = cache[addr - (CLO * 8)];
+      } else {
+            //since contents are about to be erased we flush to mem
+            flush();
+            CLO = floor(addr/8);
+            //start a mem Fetch for the given mem area
+            (mem) -> memStartFetch(addr - addr % 8, 8);
+      }
+}
+
+void Cache::start_store(uint8_t value, uint8_t addr){
+
+}
+
 void Cache::off(){
-      //TODO should also flush to memory
+      flush();
       enabled = false;
+}
+
+void Cache::do_cycle_work(){
+      switch(state){
+            case IDLE:
+                  //must be called by an outside device to exit this state
+            break;
+            case FETCH:
+                  //fetched instruction
+            break;
+            case WAIT:
+                  //waiting usually for mem
+            break;
+            case EXECUTE:
+                  //running instruction
+            break;
+      }
 }

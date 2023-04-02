@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <iomanip>
+#include <cmath>
 #include "Memory.h"
 using namespace std;
 
@@ -13,17 +14,23 @@ class Cache{
             Memory *mem;
             // if the cache is/isn't on
             bool enabled;
+            bool task_complete;
             //I = invalid   V = valid  W = written
             enum memFlags{I,V,W};
+            enum States{IDLE,FETCH,WAIT,EXECUTE};
+            enum Tasks{STORE,RETREIVE,NA};
             //true if data was written. is set as false when a new block is obtained
             bool dataWritten;
             //stores 8-bytes of information. These 8-bits will be 8-bit segments of data memory
             //does not take from instruct memory
             uint8_t cache[8];
             memFlags flags[8];
+            States state;
+            Tasks task;
             //keeps track of the memory index which Cache is on
             //0 = 0-7, 1 = 8-15, 2 = 16-23, etc ...
             uint8_t CLO;
+            uint8_t retreived_val;
             //0 = 0x00-0x07, 1 = 0x08-0x0E, 2 = 0x0F-0x27
             //writes to mem where data has been written
             void flush();

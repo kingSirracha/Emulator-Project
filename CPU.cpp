@@ -4,11 +4,13 @@
 #include <iomanip>
 #include "CPU.h"
 #include "Memory.h"
+#include "Cache.h"
 #include "Clock.h"
 using namespace std;
 
 
-CPU::CPU(IMemory *imemory, Memory *memory){
+CPU::CPU(IMemory *imemory, Memory *memory, Cache *incache){
+      cache = incache;
       imem = imemory;
       mem = memory;
       currentState = IDLE;
@@ -18,6 +20,7 @@ CPU::CPU(IMemory *imemory, Memory *memory){
       bool needsInternalCycles = false;
       int internalCycleCount = 0;
       int requiredCycles = 0;
+      TC = 0;
 }
 //uint8_t PC;
 //Sets all registers to 0x00
@@ -66,11 +69,13 @@ void CPU::dump(){
             cout << uppercase << hex << (int)regs[i] << endl;
             asci_count ++;
       }
+      cout << "TC: " << dec <<(int) TC << endl;
       cout << endl;
 }
 
 void CPU::start_tick(){
       moreCycleWork = true;
+      TC ++;
       //cout << "CPU Tick started" << endl;
       //if prevents unwarrented state change
       if (currentState == IDLE){

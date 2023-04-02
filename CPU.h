@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <iomanip>
 #include "IMemory.h"
+#include "Cache.h"
 #include "Memory.h"
 using namespace std;
 
@@ -15,6 +16,7 @@ class CPU{
       //pointers to both memory objects for acess
       IMemory *imem;
       Memory *mem;
+      Cache *cache;
 
       uint32_t input;
       //Values that will be set by instructions
@@ -36,9 +38,12 @@ class CPU{
       public:
       enum CpuStates {IDLE,WAIT,FETCH_INSTUCT,DECODE,EXECUTE,HALT};
       CpuStates currentState;
+      //program counter
       uint8_t PC;
+      //tick counter
+      uint16_t TC;
       uint8_t regs[8];
-      CPU(IMemory *imemory, Memory *memory);
+      CPU(IMemory *imemory, Memory *memory, Cache *incache);
       void start_tick();
       void reset();
       uint8_t get_reg(string reg);

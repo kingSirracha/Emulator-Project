@@ -26,6 +26,8 @@ CPU::CPU(IMemory *imemory, Memory *memory, Cache *incache){
 //Sets all registers to 0x00
 void CPU::reset(){
       PC = 0x00;
+      TC = 0;
+      currentState = IDLE;
       for(int i = 0; i < 8; i++){
             regs[i] = 0x00;
       }
@@ -222,6 +224,7 @@ void CPU::doCycleWork(){
                         break;
                   case 0b111:
                         //halt
+                        cout << "Program Has halted" << endl;
                         currentState = HALT;
                         break;
                   default:

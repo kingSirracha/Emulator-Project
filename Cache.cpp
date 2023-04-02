@@ -10,7 +10,7 @@ using namespace std;
 Cache::Cache(Memory *in_mem){
       mem = in_mem;
       CLO = 0;
-      enabled = false;
+      enabled = true;
       dataWritten = false;
       task_complete = false;
       state = IDLE;
@@ -54,6 +54,7 @@ void Cache::on(){
 
 //TODO should take as many ticks as mem needs so 5
 void Cache::flush(){
+      cout << "The cache has been flushed" << endl;
       if (dataWritten) {
             for(int i = 0; i < 8; i++){
                   if (flags[i] == W){
@@ -67,7 +68,7 @@ void Cache::flush(){
 void Cache::start_retrieve(uint8_t addr){
       task = RETREIVE;
       //if in correct range
-      if (addr >= CLO * 8 || addr < (CLO + 1) * 8){
+      if (addr >= CLO * 8 && addr < (CLO + 1) * 8 && flags[addr - (CLO * 8)] != I){
             retreived_val = cache[addr - (CLO * 8)];
             state = EXECUTE;
       } else {
@@ -131,10 +132,12 @@ void Cache::do_cycle_work(){
             case WAIT:
                   //waiting usually for mem
                   if ((mem) -> isFetchComplete()){
+                        //cache miss
                         //fetched mem vals go into cache
                         uint8_t* temp = (mem) -> endFetch();
                         for(int i = 0; i < 8; i++){
                               cache[i] = temp[i];
+                              flags[i] = V;
                         }
                         if(task = RETREIVE){
                               retreived_val = cache[ref_addr];
@@ -143,6 +146,7 @@ void Cache::do_cycle_work(){
                               flags[ref_addr] = W;
                               dataWritten = true;
                         }
+                        //all data is now considered valid
                         state = EXECUTE;
                   } else {
                         more_cycle_work = false;
